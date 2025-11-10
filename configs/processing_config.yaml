@@ -1,0 +1,4 @@
+sampling_rate: 250
+filter_band:
+  low: 1
+  high: 40

@@ -1,0 +1,6 @@
+intents:
+  - move_left
+  - move_right
+  - grasp
+  - release
+  - idle
