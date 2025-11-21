@@ -1,0 +1,11 @@
+input_source: "mock"    # mock OR ultracortex
+
+mock:
+  channels: 8
+  duration: 5
+  sample_rate: 250
+
+ultracortex:
+  serial_port: ""      # Windows example; use "/dev/ttyUSB0" on Linux
+  pull_samples: 250        # How many samples to pull per read
+  board_id: 0             # For synthetic BrainFlow data
