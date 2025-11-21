@@ -1,4 +1,4 @@
-input_source: "mock"    # mock OR ultracortex
+input_source: "ultracortex"    # mock OR ultracortex
 
 mock:
   channels: 8
