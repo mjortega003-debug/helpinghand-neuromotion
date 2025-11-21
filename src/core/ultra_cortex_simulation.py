@@ -46,10 +46,21 @@ class UltraCortexSimulation:
     def start_simulation(self):
         print("[UltraCortexSimulation] Starting simulation...")
 
-        # Handle hardware connection
+        # Handle hardware connection if in ultracortex mode
         if self.mode == "ultracortex":
-            self.data_source.connect()
-            self.data_source.start_stream()
+            print("[UltraCortexSimulation] Trying to connect to UltraCortex...")
+            success = self.data_source.connect()  # data_source is HeadsetConnector
+
+            if not success:
+                print("[UltraCortexSimulation] UltraCortex connection failed.")
+                print("[UltraCortexSimulation] Falling back to mock EEG mode...\n")
+                self.mode = "mock"
+                # Re-initialize the data source as MockDataGenerator
+                self.data_source = MockDataGenerator(
+                    channels=self.config["mock"]["channels"],
+                    duration=self.config["mock"]["duration"],
+                    sample_rate=self.config["mock"]["sample_rate"]
+                )
 
         # Retrieve EEG
         if self.mode == "mock":
@@ -66,7 +77,7 @@ class UltraCortexSimulation:
 
         # Cleaning + feature extraction
         features = self.signal_cleaner.preprocess_and_extract(eeg_data)
-
+    
         # Intent classification
         intent = self.intent_detector.classify(features)
 
@@ -78,7 +89,7 @@ class UltraCortexSimulation:
 
         print(f"[UltraCortexSimulation] Intent: {intent} | Command: {command}")
 
-        # Clean up hardware
+        # Clean up hardware if real device
         if self.mode == "ultracortex":
             self.data_source.stop_stream()
             self.data_source.disconnect()
