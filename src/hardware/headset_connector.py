@@ -16,13 +16,18 @@ class HeadsetConnector:
         self.board = BoardShim(board_id, self.params)
         self.streaming = False
 
-    def connect(self):
+    def connect(self) -> bool:
         try:
+            self.board = BoardShim(self.board_id, self.params)
             BoardShim.enable_dev_board_logger()
             self.board.prepare_session()
-            print(f"[HeadsetConnector] Session prepared for board {self.board_id}")
+            self.connection_status = True
+            print("[HeadsetConnector] Connected to UltraCortex (BrainFlow).")
+            return True
         except BrainFlowError as e:
             print(f"[HeadsetConnector] ERROR preparing session: {e}")
+            self.connection_status = False
+            return False
 
     def start_stream(self, buffer_size=45000):
         try:
