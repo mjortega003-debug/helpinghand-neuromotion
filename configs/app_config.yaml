@@ -6,5 +6,7 @@ mock:
   sample_rate: 250
 
 ultracortex:
-  serial_port: "com6"      # Windows example; use "/dev/ttyUSB0" on Linux
+  serial_port: "auto"        
   pull_samples: 250        # How many samples to pull per read
+  buffer_warmup: 1.0       # seconds to allow internal buffers to fill
+  poll_interval: 0.1       # seconds between get_data() polls
