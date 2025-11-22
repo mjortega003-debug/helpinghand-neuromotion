@@ -61,6 +61,9 @@ class UltraCortexSimulation:
                     duration=self.config["mock"]["duration"],
                     sample_rate=self.config["mock"]["sample_rate"]
                 )
+            else:
+                # Connection successful, start the stream
+                self.data_source.start_stream()
 
         # Retrieve EEG
         if self.mode == "mock":
