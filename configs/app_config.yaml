@@ -6,6 +6,5 @@ mock:
   sample_rate: 250
 
 ultracortex:
-  serial_port: ""      # Windows example; use "/dev/ttyUSB0" on Linux
+  serial_port: "com6"      # Windows example; use "/dev/ttyUSB0" on Linux
   pull_samples: 250        # How many samples to pull per read
-  board_id: 0             # For synthetic BrainFlow data
