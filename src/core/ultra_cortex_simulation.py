@@ -95,7 +95,7 @@ class UltraCortexSimulation:
 
         # From here: real-time ultracortex streaming loop
         polling_interval = self.config.get("ultracortex", {}).get("poll_interval", 0.1)  # seconds
-        num_samples = self.config.get("ultracortex", {}).get("pull_samples", 250)
+        num_samples = self.config.get("ultracortex", {}).get("pull_samples", 50)
 
         print("[UltraCortexSimulation] Entering real-time loop (Ctrl+C to stop)...")
         try:
@@ -121,10 +121,15 @@ class UltraCortexSimulation:
                     time.sleep(polling_interval)
                     continue
 
-                # PROCESS: filtering / features / classification / command
+                # Save raw EEG block every iteration
+                self.data_source.save_data(num_samples)
+
+                # PROCESS EEG → features → intent → command
                 features = self.signal_cleaner.preprocess_and_extract(eeg_arr)
                 intent = self.intent_detector.classify(features)
                 command = self.command_builder.generate_command(intent)
+
+                # Log results
                 self.session_recorder.log(intent, command)
 
                 # Output
