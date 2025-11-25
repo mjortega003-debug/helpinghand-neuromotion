@@ -58,13 +58,24 @@ class HeadsetConnector:
         if not self.streaming:
             print("[HeadsetConnector] WARNING: get_data() called but stream not running.")
             return None
+
         try:
-            data = self.board.get_board_data(num_samples)
+            # Try current buffer first (fastest and usually available)
+            data = self.board.get_current_board_data(num_samples)
+
+            # If empty, try pulling historical buffer
             if data is None or data.size == 0:
-                data = self.board.get_current_board_data(num_samples)
+                data = self.board.get_board_data()
+
+            # Still nothing available -> return None
             if data is None or data.size == 0:
                 return None
+
+            # DEBUG: print sample shape
+            print(f"[HeadsetConnector][DEBUG] Retrieved sample block shape: {data.shape}")
+
             return data
+
         except Exception as e:
             print(f"[HeadsetConnector] ERROR reading board data: {e}")
             return None
@@ -84,19 +95,19 @@ class HeadsetConnector:
         except BrainFlowError:
             pass
 
-def save_data(self, num_samples=250, filename="data.csv"):
-    data = self.get_data(num_samples)
-    if data is None:
-        print("[HeadsetConnector] No data to save.")
-        return
+    def save_data(self, num_samples=250, filename="data.csv"):
+        data = self.get_data(num_samples)
+        if data is None:
+            print("[HeadsetConnector] No data to save.")
+            return
 
-    data = data.T  # rows = samples, columns = channels
+        data = data.T  # rows = samples, columns = channels
 
-    try:
-        with open(filename, "w") as f:
-            for row in data:
-                line = "\t".join(str(val) for val in row)  # tab-separated
-                f.write(line + "\n")
-        print(f"[HeadsetConnector] Data saved to {filename}.")
-    except Exception as e:
-        print(f"[HeadsetConnector] ERROR saving data: {e}")
+        try:
+            with open(filename, "w") as f:
+                for row in data:
+                    line = "\t".join(str(val) for val in row)  # tab-separated
+                    f.write(line + "\n")
+            print(f"[HeadsetConnector] Data saved to {filename}.")
+        except Exception as e:
+            print(f"[HeadsetConnector] ERROR saving data: {e}")
