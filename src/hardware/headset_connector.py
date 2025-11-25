@@ -83,3 +83,20 @@ class HeadsetConnector:
             print("[HeadsetConnector] Session released.")
         except BrainFlowError:
             pass
+
+def save_data(self, num_samples=250, filename="data.csv"):
+    data = self.get_data(num_samples)
+    if data is None:
+        print("[HeadsetConnector] No data to save.")
+        return
+
+    data = data.T  # rows = samples, columns = channels
+
+    try:
+        with open(filename, "w") as f:
+            for row in data:
+                line = "\t".join(str(val) for val in row)  # tab-separated
+                f.write(line + "\n")
+        print(f"[HeadsetConnector] Data saved to {filename}.")
+    except Exception as e:
+        print(f"[HeadsetConnector] ERROR saving data: {e}")
