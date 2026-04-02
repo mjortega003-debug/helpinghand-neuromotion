@@ -1,12 +1,19 @@
+"""
+this file is not necessary for the current scope of the project,
+it is rendered obsolete by the openBCI GUI's built-in LSL streaming
+and synthetic data generation capabilities.
+
+
+
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BrainFlowError
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 import numpy as np
 import serial.tools.list_ports
 
 class HeadsetConnector:
-    """
-    Handles connection, data streaming, and EEG retrieval from a BrainFlow-supported board.
-    """
+"""
+    #Handles connection, data streaming, and EEG retrieval from a BrainFlow-supported board.
+"""
 
     def __init__(self, board_id, serial_port=None):
         self.board_id = board_id
@@ -83,3 +90,4 @@ class HeadsetConnector:
             print("[HeadsetConnector] Session released.")
         except BrainFlowError:
             pass
+"""

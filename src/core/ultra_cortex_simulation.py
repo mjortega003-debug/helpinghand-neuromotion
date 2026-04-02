@@ -1,3 +1,10 @@
+"""
+
+this file is not necessary for the current scope of the project,
+it is rendered obsolete by the openBCI GUI's built-in LSL streaming
+and synthetic data generation capabilities.
+
+
 from src.utils.mock_data_generator import MockDataGenerator
 from src.core.signal_cleaner import SignalCleaner
 from src.core.intent_detector import IntentDetector
@@ -13,12 +20,12 @@ import time
 import numpy as np
 
 class UltraCortexSimulation:
-    """
+    
     Main orchestrator for EEG → processing → intent → commands
     Automatically switches between:
     - synthetic EEG (mock)
     - real EEG via BrainFlow
-    """
+    
 
     def __init__(self, config_path="configs/app_config.yaml"):
         self.config = yaml.safe_load(open(config_path, "r"))
@@ -46,12 +53,12 @@ class UltraCortexSimulation:
             self.data_source = HeadsetConnector(board_id, serial_port)
 
     def start_simulation(self):
-        """
+        
         Start a continuous simulation loop.
         - If mode == "mock": run a single mock session (unchanged behavior).
         - If mode == "ultracortex": connect, start stream, wait for buffer fill,
         then continuously poll data and process it until user stops with Ctrl+C.
-        """
+        
         print("[UltraCortexSimulation] Starting simulation...")
 
         # Handle hardware connection if in ultracortex mode
@@ -149,3 +156,5 @@ class UltraCortexSimulation:
                     pass
 
             print("[UltraCortexSimulation] Simulation stopped.")
+            
+"""
