@@ -69,7 +69,7 @@ class DataProcessor:
 
         print("\n" + "="*50)
         print("RECORDING ACTIVE: 16 HEADSET CHANNELS + RICH CAMERA DATA")
-        print("Focus on your 7 positions. Press Ctrl+C to stop.")
+        print("Press Ctrl+C to stop.")
         print("="*50 + "\n")
         
         try:

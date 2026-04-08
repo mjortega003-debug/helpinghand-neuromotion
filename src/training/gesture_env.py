@@ -3,7 +3,12 @@ import numpy as np
 import pandas as pd
 from gymnasium import spaces
 from collections import Counter
-from signal_cleaner import SignalCleaner
+try:
+    # Prefer relative import when used as a package
+    from .signal_cleaner import SignalCleaner
+except Exception:
+    # Fallback to top-level import for standalone use
+    from signal_cleaner import SignalCleaner
 
 class HandGestureEnv(gym.Env):
     def __init__(self, csv_path="logs/neuromotion_data.csv", window_size=50, stride=10):

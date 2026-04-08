@@ -4,7 +4,7 @@ import os
 
 def train():
     # 1. Initialize the Environment
-    env = HandGestureEnv("logs/neuromotion_data.csv")
+    env = HandGestureEnv(r"C:\Users\Arshi\Documents\GitHub\helpinghand-neuromotion\logs\neuromotion_data.csv")
 
     # 2. Define the PPO Model
     # MlpPolicy is used because our data is a flat vector of 16 channels
@@ -12,7 +12,7 @@ def train():
         "MlpPolicy", 
         env, 
         verbose=1, 
-        device="cuda", # Uses your RTX 5060
+        device="cpu", # to use gpu change value to cuda
         learning_rate=3e-4,
         n_steps=2048,
         batch_size=64,
