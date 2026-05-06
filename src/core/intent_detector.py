@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 class IntentDetector:
-    def __init__(self, model_path=r"src\models\ppo_gesture_hand.zip", csv_path=r"logs\neuromotion_data.csv"):
+    def __init__(self, model_path=r"C:\Users\Arshi\Documents\GitHub\helpinghand-neuromotion\src\models\ppo_gesture_hand.zip", csv_path=r"C:\Users\Arshi\Documents\GitHub\helpinghand-neuromotion\logs\neuromotion_data - Copy.csv"):
         self.model_path = model_path
         self.csv_path = csv_path
         self.model = None
