@@ -5,6 +5,8 @@ import subprocess
 import json
 from pylsl import resolve_streams, StreamInlet
 
+# DataProcessor: Merges EEG, EMG, and CV (camera) streams into a single timestamped CSV.
+# Expects OpenBCI GUI running with LSL output enabled, and a camera script for gesture labeling.
 class DataProcessor:
     def __init__(self, output_file="logs/neuromotion_data.csv", camera_script=r"src\core\camera_gesture_lsl.py"):
         self.output_file = output_file
@@ -12,17 +14,19 @@ class DataProcessor:
         self.camera_process = None
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
         self.inlets = {}
-        self.num_channels = 8 
+        self.num_channels = 8  # Channels per modality (8ch x 2 = 16 total)
 
     def start_camera_feed(self):
         """Launches the camera gesture script for automated labeling."""
         print(f"[DataProcessor] Launching camera labeling script: {self.camera_script}...")
         self.camera_process = subprocess.Popen(["python", self.camera_script])
+        # Sleep gives the camera script time to initialize and publish its LSL stream
         print("[DataProcessor] Waiting 5s for LSL stability...")
         time.sleep(5)
 
     def init_csv(self):
         """Initializes the CSV with 82 columns (TS + 16 Biosignals + 3 Meta + 63 Landmarks)."""
+        # Only write the header if the file is new or empty, avoids duplicate headers on restart
         needs_header = (not os.path.exists(self.output_file)) or os.path.getsize(self.output_file) == 0
         if needs_header:
             with open(self.output_file, "w", newline="") as f:
@@ -32,7 +36,7 @@ class DataProcessor:
                 headers += [f"eeg_ch{i+1}" for i in range(self.num_channels)]
                 headers += ["cv_label", "cv_score", "cv_handedness"]
                 
-                # Add 63 columns for the 21 3D landmarks (x, y, z)
+                # 21 MediaPipe hand landmarks × 3 axes = 63 columns
                 for i in range(21):
                     headers.extend([f"lm_{i}_x", f"lm_{i}_y", f"lm_{i}_z"])
                     
@@ -44,6 +48,7 @@ class DataProcessor:
         print("[DataProcessor] Searching for UltraCortex EEG/EMG and Camera streams...")
         streams = resolve_streams(wait_time=3.0)
         
+        # Match streams by name. OpenBCI GUI publishes "EEG" and "EMG" by default
         for s in streams:
             name = s.name().upper()
             if "EMG" in name:
@@ -53,6 +58,7 @@ class DataProcessor:
             elif "CV_STREAM" in name:
                 self.inlets['cv'] = StreamInlet(s)
 
+        # CV stream is optional (falls back to defaults), but headset streams are required
         if 'eeg' not in self.inlets or 'emg' not in self.inlets:
             print("[DataProcessor] ERROR: Missing headset streams. Check OpenBCI GUI LSL settings.")
             return False
@@ -77,21 +83,21 @@ class DataProcessor:
                 writer = csv.writer(f)
                 last_emg = [0.0] * self.num_channels
                 
-                # Default empty state for the 66-item camera array
-                #[label, score, handedness, lm_0_x ... lm_20_z]
+                # Holds the most recent CV sample; used as a fallback when no new CV data arrives.
+                # Format: [label, score, handedness, lm_0_x ... lm_20_z]
                 last_cv_data = ["none", 0.0, "unknown"] + [0.0] * 63
                 
                 while True:
-                    #Pull EEG
+                    # EEG drives the row timestamp — one row is written per EEG sample
                     sample_eeg, ts_eeg = self.inlets['eeg'].pull_sample(timeout=0.01) if 'eeg' in self.inlets else (None, None)
                     
-                    #Update EMG
+                    # EMG is pulled non-blocking; last known value persists if no new sample
                     if 'emg' in self.inlets:
                         sample_emg, _ = self.inlets['emg'].pull_sample(timeout=0.0)
                         if sample_emg:
                             last_emg = sample_emg[:self.num_channels]
                     
-                    #Parse JSON CV Payload
+                    # CV payload is a JSON string containing gesture label, confidence, handedness, and landmarks
                     if 'cv' in self.inlets:
                         sample_cv, _ = self.inlets['cv'].pull_sample(timeout=0.0)
                         if sample_cv:
@@ -106,7 +112,7 @@ class DataProcessor:
                                 # If the JSON is corrupted in transit, ignores the sample and keeps the last known state
                                 pass
 
-                    #Write synced 82-column row
+                    # Only write a row when EEG data is available (EEG is the sync anchor)
                     if sample_eeg:
                         eeg_data = sample_eeg[:self.num_channels]
                         row = [ts_eeg] + last_emg + eeg_data + last_cv_data
